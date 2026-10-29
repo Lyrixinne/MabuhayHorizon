@@ -72,7 +72,13 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!incoming) return;
     const left = RING_SECONDS * 1000 - (Date.now() - new Date(incoming.call.created_at).getTime());
-    const t = setTimeout(() => setIncoming(null), Math.max(left, 0));
+    const callId = incoming.call.id;
+    const t = setTimeout(async () => {
+      // Expire the server-side ringing state too, so the caller does not wait
+      // for a separate timeout and stale incoming calls do not remain active.
+      await supabase.rpc("respond_call", { p_call: callId, p_status: "declined" });
+      setIncoming((current) => (current?.call.id === callId ? null : current));
+    }, Math.max(left, 0));
     return () => clearTimeout(t);
   }, [incoming]);
 
@@ -90,13 +96,21 @@ export function CallProvider({ children }: { children: React.ReactNode }) {
   }, [outgoing]);
 
   const startCall = useCallback(async (otherId: string, otherName: string) => {
-    const { data, error } = await supabase.rpc("start_call", { p_callee: otherId });
-    if (error || !data) {
-      notify("Could not start the call", friendlyError(error, "Please try again."));
-      return;
+    if (!me || busy || outgoingRef.current) return;
+    setBusy(true);
+    try {
+      const { data, error } = await supabase.rpc("start_call", { p_callee: otherId });
+      if (error || !data) {
+        notify("Could not start the call", friendlyError(error, "Please try again."));
+        return;
+      }
+      setOutgoing({ call: data as Call, name: otherName });
+    } catch {
+      notify("Could not start the call", "Check your connection and try again.");
+    } finally {
+      setBusy(false);
     }
-    setOutgoing({ call: data as Call, name: otherName });
-  }, []);
+  }, [me, busy]);
 
   const answer = async (status: "accepted" | "declined") => {
     if (!incoming) return;
