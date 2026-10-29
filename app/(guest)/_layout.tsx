@@ -22,11 +22,11 @@ export default function GuestLayout() {
           tabBarStyle: { backgroundColor: colors.navy, borderTopColor: colors.navyLine },
         }}
       >
-        <Tabs.Screen name="explore" options={{ title: "Explore", tabBarIcon: ({ color, size }) => <Ionicons name="compass" size={size} color={color} /> }} />
-        <Tabs.Screen name="map" options={{ title: "Map", tabBarIcon: ({ color, size }) => <Ionicons name="map" size={size} color={color} /> }} />
-        <Tabs.Screen name="bookings" options={{ title: "Bookings", tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} /> }} />
-        <Tabs.Screen name="chat" options={{ title: "Chat", tabBarIcon: ({ color, size }) => <Ionicons name="chatbubbles" size={size} color={color} /> }} />
-        <Tabs.Screen name="settings" options={{ title: "Settings", tabBarIcon: ({ color, size }) => <Ionicons name="settings" size={size} color={color} /> }} />
+        <Tabs.Screen name="explore" options={{ title: "Explore", tabBarIcon: ({ color, size }) => <Ionicons name="compass" size={size} color={typeof color === "string" ? color : colors.amber} /> }} />
+        <Tabs.Screen name="map" options={{ title: "Map", tabBarIcon: ({ color, size }) => <Ionicons name="map" size={size} color={typeof color === "string" ? color : colors.amber} /> }} />
+        <Tabs.Screen name="bookings" options={{ title: "Bookings", tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={typeof color === "string" ? color : colors.amber} /> }} />
+        <Tabs.Screen name="chat" options={{ title: "Chat", tabBarIcon: ({ color, size }) => <Ionicons name="chatbubbles" size={size} color={typeof color === "string" ? color : colors.amber} /> }} />
+        <Tabs.Screen name="settings" options={{ title: "Settings", tabBarIcon: ({ color, size }) => <Ionicons name="settings" size={size} color={typeof color === "string" ? color : colors.amber} /> }} />
       </Tabs>
     </View>
   );
