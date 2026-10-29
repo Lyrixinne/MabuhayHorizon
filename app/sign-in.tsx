@@ -11,6 +11,7 @@ import {
   Pressable,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { Feather } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../lib/auth-context";
 import { colors } from "../constants/theme";
@@ -23,6 +24,7 @@ export default function SignIn() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -86,18 +88,12 @@ export default function SignIn() {
               />
 
               <Text style={styles.label}>Password</Text>
-              <TextInput
-                value={password}
-                onChangeText={setPassword}
-                style={styles.input}
-                secureTextEntry
-                autoCapitalize="none"
-                autoComplete="current-password"
-                textContentType="password"
-                accessibilityLabel="Password"
-                returnKeyType="done"
-                onSubmitEditing={submit}
-              />
+              <View style={styles.passwordField}>
+                <TextInput value={password} onChangeText={setPassword} style={[styles.input, styles.passwordInput]} secureTextEntry={!showPassword} autoCapitalize="none" autoComplete="current-password" textContentType="password" accessibilityLabel="Password" returnKeyType="done" onSubmitEditing={submit} />
+                <Pressable accessibilityRole="button" accessibilityLabel={showPassword ? "Hide password" : "Show password"} onPress={() => setShowPassword((visible) => !visible)} style={styles.eyeButton} hitSlop={10}>
+                  <Feather name={showPassword ? "eye-off" : "eye"} size={22} color="#333333" />
+                </Pressable>
+              </View>
 
               {error ? (
                 <Text accessibilityRole="alert" style={styles.error}>
@@ -209,6 +205,9 @@ const styles = StyleSheet.create({
     color: "#111111",
     marginBottom: 26,
   },
+  passwordField: { position: "relative", width: "100%", marginBottom: 26 },
+  passwordInput: { marginBottom: 0, paddingRight: 58 },
+  eyeButton: { position: "absolute", right: 16, top: 0, bottom: 0, width: 40, alignItems: "center", justifyContent: "center" },
   submitButton: {
     width: "100%",
     minHeight: 76,
