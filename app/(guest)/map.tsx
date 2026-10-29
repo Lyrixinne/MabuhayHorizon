@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { supabase } from "../../lib/supabase";
@@ -14,6 +14,11 @@ export default function MapScreen() {
   const [hotels, setHotels] = useState<Hotel[] | null>(null);
   const [selected, setSelected] = useState<Hotel | null>(null);
   const [booking, setBooking] = useState<Hotel | null>(null);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [selected?.id, selected?.image_url]);
 
   useFocusEffect(
     useCallback(() => {
@@ -68,14 +73,12 @@ export default function MapScreen() {
             contentContainerStyle={styles.panelContent}
             showsVerticalScrollIndicator={false}
           >
-            {selected.image_url ? (
+            {selected.image_url && !imageFailed ? (
               <Image
                 source={{ uri: selected.image_url }}
                 style={styles.hotelImage}
                 resizeMode="cover"
-                onError={() => {
-                  // Keep the hotel details visible if the image URL is invalid.
-                }}
+                onError={() => setImageFailed(true)}
               />
             ) : (
               <View style={styles.imagePlaceholder}>
