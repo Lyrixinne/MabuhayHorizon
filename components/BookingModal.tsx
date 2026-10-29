@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
+import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import { Platform } from "react-native";
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { supabase } from "../lib/supabase";
@@ -31,6 +33,7 @@ export function BookingModal({ hotel, onClose, onBooked }: Props) {
   const currency = useCurrency();
   const today = toIsoDate(new Date());
   const [checkIn, setCheckIn] = useState(addDays(today, 1));
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [nights, setNights] = useState(1);
   const [guests, setGuests] = useState(2);
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -115,13 +118,38 @@ export function BookingModal({ hotel, onClose, onBooked }: Props) {
             </View>
           ) : (
             <ScrollView>
-              <Stepper
-                label={`Check-in: ${prettyDate(checkIn)}`}
-                value=""
-                onMinus={() => setCheckIn((c) => (c > today ? addDays(c, -1) : c))}
-                onPlus={() => setCheckIn((c) => addDays(c, 1))}
-                minusDisabled={checkIn <= today}
-              />
+              <Text style={styles.stepLabel}>Check-in date</Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Choose check-in date, currently ${prettyDate(checkIn)}`}
+                onPress={() => setShowDatePicker(true)}
+                style={styles.dateButton}
+              >
+                <Text style={styles.dateButtonText}>▦  {prettyDate(checkIn)}</Text>
+                <Text style={styles.dateButtonAction}>Choose date</Text>
+              </Pressable>
+              {showDatePicker ? (
+                <DateTimePicker
+                  value={new Date(`${checkIn}T12:00:00`)}
+                  mode="date"
+                  display={Platform.OS === "android" ? "calendar" : "inline"}
+                  minimumDate={new Date(`${today}T00:00:00`)}
+                  onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
+                    if (Platform.OS === "android") setShowDatePicker(false);
+                    if (event.type === "dismissed" || !selectedDate) return;
+                    const year = selectedDate.getFullYear();
+                    const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+                    const day = String(selectedDate.getDate()).padStart(2, "0");
+                    const selectedIso = `${year}-${month}-${day}`;
+                    setCheckIn(selectedIso < today ? today : selectedIso);
+                  }}
+                />
+              ) : null}
+              {Platform.OS === "ios" && showDatePicker ? (
+                <Pressable onPress={() => setShowDatePicker(false)} style={styles.dateDoneButton}>
+                  <Text style={styles.dateDoneText}>Done</Text>
+                </Pressable>
+              ) : null}
               <Stepper label="Nights" value={String(nights)} onMinus={() => setNights((n) => Math.max(1, n - 1))} onPlus={() => setNights((n) => Math.min(30, n + 1))} minusDisabled={nights <= 1} plusDisabled={nights >= 30} />
               <Stepper label="Guests" value={String(guests)} onMinus={() => setGuests((g) => Math.max(1, g - 1))} onPlus={() => setGuests((g) => Math.min(10, g + 1))} minusDisabled={guests <= 1} plusDisabled={guests >= 10} />
               <Text style={styles.sub}>Check-out: {prettyDate(checkOut)}</Text>
@@ -163,6 +191,11 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: "800", color: colors.text, flex: 1 },
   close: { color: colors.blue, fontSize: 16, fontWeight: "700" },
   msg: { fontSize: 16, color: colors.text, marginBottom: 16 },
+  dateButton: { minHeight: 52, borderRadius: radius.md, borderWidth: 1, borderColor: colors.line, backgroundColor: "#F8FAFC", paddingHorizontal: 14, flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 8, marginBottom: 12 },
+  dateButtonText: { color: colors.text, fontSize: 16, fontWeight: "700" },
+  dateButtonAction: { color: colors.blue, fontSize: 14, fontWeight: "700" },
+  dateDoneButton: { alignSelf: "flex-end", paddingHorizontal: 18, paddingVertical: 10 },
+  dateDoneText: { color: colors.blue, fontSize: 16, fontWeight: "700" },
   stepRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 8 },
   stepLabel: { fontSize: 16, color: colors.text, fontWeight: "600", flex: 1 },
   stepControls: { flexDirection: "row", alignItems: "center", gap: 10 },
