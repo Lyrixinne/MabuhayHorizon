@@ -9,16 +9,18 @@ import { MapPane } from "../../components/MapPane";
 import { BookingModal } from "../../components/BookingModal";
 import { Button, Spinner } from "../../components/ui";
 import { colors, radius } from "../../constants/theme";
+import { hotelImageUrl } from "../../lib/hotel-images";
 
 export default function MapScreen() {
   const [hotels, setHotels] = useState<Hotel[] | null>(null);
   const [selected, setSelected] = useState<Hotel | null>(null);
   const [booking, setBooking] = useState<Hotel | null>(null);
   const [imageFailed, setImageFailed] = useState(false);
+  const selectedImageUrl = selected ? (selected.image_url || hotelImageUrl(selected)) : null;
 
   useEffect(() => {
     setImageFailed(false);
-  }, [selected?.id, selected?.image_url]);
+  }, [selected?.id, selectedImageUrl]);
 
   useFocusEffect(
     useCallback(() => {
@@ -73,9 +75,9 @@ export default function MapScreen() {
             contentContainerStyle={styles.panelContent}
             showsVerticalScrollIndicator={false}
           >
-            {selected.image_url && !imageFailed ? (
+            {selectedImageUrl && !imageFailed ? (
               <Image
-                source={{ uri: selected.image_url }}
+                source={{ uri: selectedImageUrl! }}
                 style={styles.hotelImage}
                 resizeMode="cover"
                 onError={() => setImageFailed(true)}
