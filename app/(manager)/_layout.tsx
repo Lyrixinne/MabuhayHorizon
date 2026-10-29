@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Redirect, Tabs } from "expo-router";
 import { View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -35,7 +35,11 @@ export default function ManagerLayout() {
               <Ionicons
                 name="stats-chart"
                 size={size}
-                color={color ?? colors.amber}
+                color={
+                  typeof color === "number"
+                    ? colors.amber
+                    : (color ?? colors.amber)
+                }
               />
             ),
           }}
@@ -48,7 +52,7 @@ export default function ManagerLayout() {
               <Ionicons
                 name="calendar"
                 size={size}
-                color={color ?? colors.amber}
+                color={typeof color === "number" ? colors.amber : color ?? colors.amber}
               />
             ),
           }}
@@ -61,7 +65,7 @@ export default function ManagerLayout() {
               <Ionicons
                 name="business"
                 size={size}
-                color={color ?? colors.amber}
+                color={typeof color === "number" ? colors.amber : color ?? colors.amber}
               />
             ),
           }}
@@ -74,7 +78,7 @@ export default function ManagerLayout() {
               <Ionicons
                 name="people"
                 size={size}
-                color={color ?? colors.amber}
+                color={typeof color === "number" ? colors.amber : color ?? colors.amber}
               />
             ),
           }}
@@ -87,7 +91,7 @@ export default function ManagerLayout() {
               <Ionicons
                 name="chatbubbles"
                 size={size}
-                color={color ?? colors.amber}
+                color={typeof color === "number" ? colors.amber : color ?? colors.amber}
               />
             ),
           }}
@@ -100,7 +104,7 @@ export default function ManagerLayout() {
               <Ionicons
                 name="settings"
                 size={size}
-                color={color ?? colors.amber}
+                color={typeof color === "number" ? colors.amber : color ?? colors.amber}
               />
             ),
           }}
