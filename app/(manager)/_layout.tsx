@@ -23,12 +23,12 @@ export default function ManagerLayout() {
           tabBarStyle: { backgroundColor: colors.navy, borderTopColor: colors.navyLine },
         }}
       >
-        <Tabs.Screen name="dashboard" options={{ title: "Dashboard", tabBarIcon: ({ color, size }) => <Ionicons name="stats-chart" size={size} color={color} /> }} />
-        <Tabs.Screen name="bookings" options={{ title: "Reservations", tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} /> }} />
-        <Tabs.Screen name="hotels" options={{ title: "Hotels", tabBarIcon: ({ color, size }) => <Ionicons name="business" size={size} color={color} /> }} />
-        <Tabs.Screen name="staff" options={{ title: "Team", tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} /> }} />
-        <Tabs.Screen name="chat" options={{ title: "Chat", tabBarIcon: ({ color, size }) => <Ionicons name="chatbubbles" size={size} color={color} /> }} />
-        <Tabs.Screen name="settings" options={{ title: "Settings", tabBarIcon: ({ color, size }) => <Ionicons name="settings" size={size} color={color} /> }} />
+        <Tabs.Screen name="dashboard" options={{ title: "Dashboard", tabBarIcon: ({ color, size }) => <Ionicons name="stats-chart" size={size} color={typeof color === "string" ? color : colors.amber} /> }} />
+        <Tabs.Screen name="bookings" options={{ title: "Reservations", tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={typeof color === "string" ? color : colors.amber} /> }} />
+        <Tabs.Screen name="hotels" options={{ title: "Hotels", tabBarIcon: ({ color, size }) => <Ionicons name="business" size={size} color={typeof color === "string" ? color : colors.amber} /> }} />
+        <Tabs.Screen name="staff" options={{ title: "Team", tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={typeof color === "string" ? color : colors.amber} /> }} />
+        <Tabs.Screen name="chat" options={{ title: "Chat", tabBarIcon: ({ color, size }) => <Ionicons name="chatbubbles" size={size} color={typeof color === "string" ? color : colors.amber} /> }} />
+        <Tabs.Screen name="settings" options={{ title: "Settings", tabBarIcon: ({ color, size }) => <Ionicons name="settings" size={size} color={typeof color === "string" ? color : colors.amber} /> }} />
       </Tabs>
     </View>
   );
