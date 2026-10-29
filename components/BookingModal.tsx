@@ -14,6 +14,11 @@ import { colors, radius } from "../constants/theme";
 
 type Props = { hotel: Hotel | null; onClose: () => void; onBooked: () => void };
 
+function formatMonthDayYear(isoDate: string) {
+  const [year, month, day] = isoDate.split("-");
+  return month && day && year ? `${month}/${day}/${year}` : isoDate;
+}
+
 function Stepper({ label, value, onMinus, onPlus, minusDisabled, plusDisabled }: { label: string; value: string; onMinus: () => void; onPlus: () => void; minusDisabled?: boolean; plusDisabled?: boolean }) {
   return (
     <View style={styles.stepRow}>
@@ -121,7 +126,7 @@ export function BookingModal({ hotel, onClose, onBooked }: Props) {
               <Text style={styles.stepLabel}>Check-in date</Text>
               {Platform.OS === "web" ? (
                 <View style={styles.dateButton}>
-                  <Text style={styles.dateButtonText}>▦  Choose check-in</Text>
+                  <Text style={styles.dateButtonText}>▦  {formatMonthDayYear(checkIn)}</Text>
                   {React.createElement("input", {
                     type: "date",
                     value: checkIn,
@@ -147,11 +152,11 @@ export function BookingModal({ hotel, onClose, onBooked }: Props) {
                 <>
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={`Choose check-in date, currently ${prettyDate(checkIn)}`}
+                    accessibilityLabel={`Choose check-in date, currently ${formatMonthDayYear(checkIn)}`}
                     onPress={() => setShowDatePicker(true)}
                     style={styles.dateButton}
                   >
-                    <Text style={styles.dateButtonText}>▦  {prettyDate(checkIn)}</Text>
+                    <Text style={styles.dateButtonText}>▦  {formatMonthDayYear(checkIn)}</Text>
                     <Text style={styles.dateButtonAction}>Choose date</Text>
                   </Pressable>
                   {showDatePicker ? (
