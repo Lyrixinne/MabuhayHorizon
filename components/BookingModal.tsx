@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Platform } from "react-native";
-import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { supabase } from "../lib/supabase";
 import { useAuth, useCurrency } from "../lib/auth-context";
@@ -119,37 +119,65 @@ export function BookingModal({ hotel, onClose, onBooked }: Props) {
           ) : (
             <ScrollView>
               <Text style={styles.stepLabel}>Check-in date</Text>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`Choose check-in date, currently ${prettyDate(checkIn)}`}
-                onPress={() => setShowDatePicker(true)}
-                style={styles.dateButton}
-              >
-                <Text style={styles.dateButtonText}>▦  {prettyDate(checkIn)}</Text>
-                <Text style={styles.dateButtonAction}>Choose date</Text>
-              </Pressable>
-              {showDatePicker ? (
-                <DateTimePicker
-                  value={new Date(`${checkIn}T12:00:00`)}
-                  mode="date"
-                  display={Platform.OS === "android" ? "calendar" : "inline"}
-                  minimumDate={new Date(`${today}T00:00:00`)}
-                  onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
-                    if (Platform.OS === "android") setShowDatePicker(false);
-                    if (event.type === "dismissed" || !selectedDate) return;
-                    const year = selectedDate.getFullYear();
-                    const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
-                    const day = String(selectedDate.getDate()).padStart(2, "0");
-                    const selectedIso = `${year}-${month}-${day}`;
-                    setCheckIn(selectedIso < today ? today : selectedIso);
-                  }}
-                />
-              ) : null}
-              {Platform.OS === "ios" && showDatePicker ? (
-                <Pressable onPress={() => setShowDatePicker(false)} style={styles.dateDoneButton}>
-                  <Text style={styles.dateDoneText}>Done</Text>
-                </Pressable>
-              ) : null}
+              {Platform.OS === "web" ? (
+                <View style={styles.dateButton}>
+                  <Text style={styles.dateButtonText}>▦  Choose check-in</Text>
+                  {React.createElement("input", {
+                    type: "date",
+                    value: checkIn,
+                    min: today,
+                    "aria-label": "Check-in date",
+                    onChange: (event: { target: { value: string } }) => {
+                      const selectedIso = event.target.value;
+                      if (selectedIso && selectedIso >= today) setCheckIn(selectedIso);
+                    },
+                    style: {
+                      border: "none",
+                      background: "transparent",
+                      color: colors.text,
+                      font: "inherit",
+                      fontSize: 15,
+                      minWidth: 0,
+                      maxWidth: "100%",
+                      cursor: "pointer",
+                    },
+                  })}
+                </View>
+              ) : (
+                <>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Choose check-in date, currently ${prettyDate(checkIn)}`}
+                    onPress={() => setShowDatePicker(true)}
+                    style={styles.dateButton}
+                  >
+                    <Text style={styles.dateButtonText}>▦  {prettyDate(checkIn)}</Text>
+                    <Text style={styles.dateButtonAction}>Choose date</Text>
+                  </Pressable>
+                  {showDatePicker ? (
+                    <DateTimePicker
+                      value={new Date(`${checkIn}T12:00:00`)}
+                      mode="date"
+                      display={Platform.OS === "android" ? "calendar" : "inline"}
+                      minimumDate={new Date(`${today}T00:00:00`)}
+                      onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
+                        if (Platform.OS === "android") setShowDatePicker(false);
+                        if (event.type === "dismissed" || !selectedDate) return;
+                        const year = selectedDate.getFullYear();
+                        const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+                        const day = String(selectedDate.getDate()).padStart(2, "0");
+                        const selectedIso = `${year}-${month}-${day}`;
+                        setCheckIn(selectedIso < today ? today : selectedIso);
+                      }}
+                    />
+                  ) : null}
+                  {Platform.OS === "ios" && showDatePicker ? (
+                    <Pressable onPress={() => setShowDatePicker(false)} style={styles.dateDoneButton}>
+                      <Text style={styles.dateDoneText}>Done</Text>
+                    </Pressable>
+                  ) : null}
+                </>
+              )}
               <Stepper label="Nights" value={String(nights)} onMinus={() => setNights((n) => Math.max(1, n - 1))} onPlus={() => setNights((n) => Math.min(30, n + 1))} minusDisabled={nights <= 1} plusDisabled={nights >= 30} />
               <Stepper label="Guests" value={String(guests)} onMinus={() => setGuests((g) => Math.max(1, g - 1))} onPlus={() => setGuests((g) => Math.min(10, g + 1))} minusDisabled={guests <= 1} plusDisabled={guests >= 10} />
               <Text style={styles.sub}>Check-out: {prettyDate(checkOut)}</Text>
