@@ -42,6 +42,72 @@ function RoomRow({ room, onChanged }: { room: Room; onChanged: () => void }) {
   );
 }
 
+function HotelLocationEditor({ hotel, onSaved }: { hotel: HotelRow; onSaved: () => void }) {
+  const [location, setLocation] = useState(hotel.location ?? "");
+  const [latitude, setLatitude] = useState(String(hotel.latitude ?? ""));
+  const [longitude, setLongitude] = useState(String(hotel.longitude ?? ""));
+  const [saving, setSaving] = useState(false);
+
+  const saveLocation = async () => {
+    const lat = Number(latitude.trim());
+    const lng = Number(longitude.trim());
+
+    if (!location.trim()) return notify("Hotel address needed", "Enter the hotel's street address or location.");
+    if (!latitude.trim() || !longitude.trim() || !Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      return notify("Check the map coordinates", "Enter a valid latitude (-90 to 90) and longitude (-180 to 180).");
+    }
+    if (lat === 0 && lng === 0) return notify("Check the map coordinates", "The coordinates cannot be 0, 0. Enter the hotel's actual location.");
+
+    setSaving(true);
+    const { error } = await supabase.from("hotels").update({
+      location: location.trim(),
+      latitude: lat,
+      longitude: lng,
+    }).eq("id", hotel.id);
+    setSaving(false);
+
+    if (error) return notify("Could not save hotel location", friendlyError(error, "Please try again."));
+    notify("Hotel location saved", "The hotel's address and map pin coordinates have been updated.");
+    onSaved();
+  };
+
+  return (
+    <View style={styles.locationEditor}>
+      <Text style={styles.addTitle}>Hotel address and map pin</Text>
+      <TextInput
+        value={location}
+        onChangeText={setLocation}
+        placeholder="Hotel address / location"
+        placeholderTextColor="#94A3B8"
+        style={styles.input}
+        accessibilityLabel={`Address for ${hotel.name}`}
+      />
+      <View style={styles.addRow}>
+        <TextInput
+          value={latitude}
+          onChangeText={setLatitude}
+          placeholder="Latitude"
+          placeholderTextColor="#94A3B8"
+          keyboardType="decimal-pad"
+          style={[styles.input, { flex: 1 }]}
+          accessibilityLabel={`Latitude for ${hotel.name}`}
+        />
+        <TextInput
+          value={longitude}
+          onChangeText={setLongitude}
+          placeholder="Longitude"
+          placeholderTextColor="#94A3B8"
+          keyboardType="decimal-pad"
+          style={[styles.input, { flex: 1 }]}
+          accessibilityLabel={`Longitude for ${hotel.name}`}
+        />
+      </View>
+      <Text style={styles.meta}>Enter the hotel's exact coordinates so its pin appears in the correct place on the guest map.</Text>
+      <Button label="Save hotel location" kind="dark" onPress={saveLocation} loading={saving} />
+    </View>
+  );
+}
+
 function AddRoom({ hotelId, onAdded }: { hotelId: string; onAdded: () => void }) {
   const [number, setNumber] = useState("");
   const [type, setType] = useState("Standard");
@@ -104,7 +170,7 @@ export default function Hotels() {
   if (!hotels) return <Spinner />;
   return (
     <Page>
-      <Title sub="Change room prices, open or hide rooms, and add rooms">Hotels and Rooms</Title>
+      <Title sub="Update hotel addresses and map coordinates, manage rooms, and change availability">Hotels and Rooms</Title>
       {hotels.length === 0 ? <Empty text="No hotels yet." /> : null}
       {hotels.map((h) => (
         <Card key={h.id}>
@@ -118,6 +184,7 @@ export default function Hotels() {
               <Text style={styles.meta}>{h.active ? "Listed" : "Hidden"}</Text>
             </View>
           </View>
+          <HotelLocationEditor key={`${h.id}-location`} hotel={h} onSaved={load} />
           {h.rooms.map((r) => <RoomRow key={r.id} room={r} onChanged={load} />)}
           <AddRoom hotelId={h.id} onAdded={load} />
         </Card>
@@ -129,12 +196,13 @@ export default function Hotels() {
 const styles = StyleSheet.create({
   hotelHead: { flexDirection: "row", gap: 10, marginBottom: 8 },
   hotelName: { fontSize: 19, fontWeight: "800", color: colors.text },
-  meta: { color: colors.muted, fontSize: 13, marginTop: 2 },
+  meta: { color: colors.muted, fontSize: 13, marginTop: 2, lineHeight: 18 },
   room: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 10, borderTopWidth: 1, borderTopColor: colors.line, flexWrap: "wrap" },
   roomName: { fontSize: 15, fontWeight: "700", color: colors.text },
   price: { width: 90, backgroundColor: "#F1F5F9", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 8, fontSize: 15, color: colors.text },
   add: { marginTop: 8, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.line, gap: 8 },
+  locationEditor: { marginTop: 10, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.line, gap: 8 },
   addTitle: { fontWeight: "800", color: colors.text },
-  addRow: { flexDirection: "row", gap: 8, alignItems: "center" },
-  input: { backgroundColor: "#F1F5F9", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 10, fontSize: 15, color: colors.text },
+  addRow: { flexDirection: "row", gap: 8, alignItems: "center", flexWrap: "wrap" },
+  input: { backgroundColor: "#F1F5F9", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 10, fontSize: 15, color: colors.text, minWidth: 0 },
 });

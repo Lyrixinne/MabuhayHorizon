@@ -153,8 +153,21 @@ function Thread({ me, conversationId, other, onBack, onCall }: { me: string; con
   const listRef = useRef<FlatList<Message>>(null);
 
   const markRead = useCallback(() => {
-    supabase.rpc("mark_conversation_read", { p_conversation: conversationId }).then(() => {});
+    // Read status is server-owned; don't let a transient network error break the thread.
+    void supabase.rpc("mark_conversation_read", { p_conversation: conversationId });
   }, [conversationId]);
+
+  const mergeMessages = useCallback((incoming: Message[]) => {
+    setMessages((current) => {
+      const byId = new Map<string, Message>();
+      for (const message of current) byId.set(message.id, message);
+      for (const message of incoming) byId.set(message.id, message);
+      return [...byId.values()].sort((a, b) => {
+        const time = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        return time || a.id.localeCompare(b.id);
+      });
+    });
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -166,14 +179,14 @@ function Thread({ me, conversationId, other, onBack, onCall }: { me: string; con
       .then(({ data, error }) => {
         if (!alive) return;
         if (error) notify("Could not load messages", friendlyError(error, "Please try again."));
-        else setMessages((data ?? []) as Message[]);
+        else mergeMessages((data ?? []) as Message[]);
         markRead();
       });
     const ch = supabase
       .channel(`thread-${conversationId}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${conversationId}` }, (payload) => {
         const m = payload.new as Message;
-        setMessages((cur) => (cur.some((x) => x.id === m.id) ? cur : [...cur, m]));
+        mergeMessages([m]);
         if (m.sender_id !== me) markRead();
       })
       .subscribe();
@@ -181,22 +194,29 @@ function Thread({ me, conversationId, other, onBack, onCall }: { me: string; con
       alive = false;
       supabase.removeChannel(ch);
     };
-  }, [conversationId, me, markRead]);
+  }, [conversationId, me, markRead, mergeMessages]);
 
   const send = async () => {
     const body = text.trim();
     if (!body || sending) return;
     setSending(true);
-    const { data, error } = await supabase
-      .from("messages")
-      .insert({ conversation_id: conversationId, sender_id: me, body })
-      .select()
-      .single();
-    setSending(false);
-    if (error) return notify("Message not sent", friendlyError(error, "Please try again."));
-    setText("");
-    const m = data as Message;
-    setMessages((cur) => (cur.some((x) => x.id === m.id) ? cur : [...cur, m]));
+    try {
+      const { data, error } = await supabase
+        .from("messages")
+        .insert({ conversation_id: conversationId, sender_id: me, body })
+        .select()
+        .single();
+      if (error) {
+        notify("Message not sent", friendlyError(error, "Please try again."));
+        return;
+      }
+      setText("");
+      mergeMessages([data as Message]);
+    } catch {
+      notify("Message not sent", "Check your connection and try again.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
