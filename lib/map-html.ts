@@ -1,4 +1,5 @@
 import type { Hotel } from "./types";
+import { hotelImageUrl } from "./hotel-images";
 
 export function buildMapHtml(hotels: Hotel[]): string {
   const pins = JSON.stringify(
@@ -7,7 +8,7 @@ export function buildMapHtml(hotels: Hotel[]): string {
       name: hotel.name,
       location: hotel.location,
       nearSpot: hotel.near_spot,
-      imageUrl: hotel.image_url,
+      imageUrl: hotelImageUrl(hotel),
       lat: hotel.latitude,
       lng: hotel.longitude,
     })),
