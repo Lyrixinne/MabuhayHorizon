@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { Feather } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../lib/auth-context";
 import { notify } from "../lib/dialog";
@@ -26,6 +27,8 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -125,31 +128,20 @@ export default function SignUp() {
               />
 
               <Text style={styles.label}>Password</Text>
-              <TextInput
-                value={password}
-                onChangeText={setPassword}
-                style={styles.input}
-                secureTextEntry
-                autoCapitalize="none"
-                autoComplete="new-password"
-                textContentType="newPassword"
-                accessibilityLabel="Password"
-                returnKeyType="next"
-              />
+              <View style={styles.passwordField}>
+                <TextInput value={password} onChangeText={setPassword} style={[styles.input, styles.passwordInput]} secureTextEntry={!showPassword} autoCapitalize="none" autoComplete="new-password" textContentType="newPassword" accessibilityLabel="Password" returnKeyType="next" />
+                <Pressable accessibilityRole="button" accessibilityLabel={showPassword ? "Hide password" : "Show password"} onPress={() => setShowPassword((visible) => !visible)} style={styles.eyeButton} hitSlop={10}>
+                  <Feather name={showPassword ? "eye-off" : "eye"} size={22} color="#333333" />
+                </Pressable>
+              </View>
 
               <Text style={styles.label}>Confirm Password</Text>
-              <TextInput
-                value={confirm}
-                onChangeText={setConfirm}
-                style={styles.input}
-                secureTextEntry
-                autoCapitalize="none"
-                autoComplete="new-password"
-                textContentType="newPassword"
-                accessibilityLabel="Confirm Password"
-                returnKeyType="done"
-                onSubmitEditing={submit}
-              />
+              <View style={styles.passwordField}>
+                <TextInput value={confirm} onChangeText={setConfirm} style={[styles.input, styles.passwordInput]} secureTextEntry={!showConfirm} autoCapitalize="none" autoComplete="new-password" textContentType="newPassword" accessibilityLabel="Confirm Password" returnKeyType="done" onSubmitEditing={submit} />
+                <Pressable accessibilityRole="button" accessibilityLabel={showConfirm ? "Hide confirm password" : "Show confirm password"} onPress={() => setShowConfirm((visible) => !visible)} style={styles.eyeButton} hitSlop={10}>
+                  <Feather name={showConfirm ? "eye-off" : "eye"} size={22} color="#333333" />
+                </Pressable>
+              </View>
 
               {error ? (
                 <Text accessibilityRole="alert" style={styles.error}>
@@ -234,6 +226,9 @@ const styles = StyleSheet.create({
     color: "#111111",
     marginBottom: 22,
   },
+  passwordField: { position: "relative", width: "100%", marginBottom: 22 },
+  passwordInput: { marginBottom: 0, paddingRight: 58 },
+  eyeButton: { position: "absolute", right: 14, top: 0, bottom: 0, width: 40, alignItems: "center", justifyContent: "center" },
   submitButton: {
     width: "100%",
     minHeight: 76,
