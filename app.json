@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "Mabuhay Horizon",
+    "slug": "mabuhay-horizon",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "mabuhayhorizon",
+    "userInterfaceStyle": "light",
+    "android": {
+      "package": "ph.mabuhayhorizon.app",
+      "predictiveBackGestureEnabled": false
+    },
+    "web": { "output": "single", "bundler": "metro" },
+    "plugins": ["expo-router", "expo-font"],
+    "experiments": { "typedRoutes": false }
+  }
+}
