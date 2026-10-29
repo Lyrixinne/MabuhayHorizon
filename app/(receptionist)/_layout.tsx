@@ -23,10 +23,10 @@ export default function ReceptionistLayout() {
           tabBarStyle: { backgroundColor: colors.navy, borderTopColor: colors.navyLine },
         }}
       >
-        <Tabs.Screen name="desk" options={{ title: "Front Desk", tabBarIcon: ({ color, size }) => <Ionicons name="notifications" size={size} color={color} /> }} />
-        <Tabs.Screen name="bookings" options={{ title: "Reservations", tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} /> }} />
-        <Tabs.Screen name="chat" options={{ title: "Chat", tabBarIcon: ({ color, size }) => <Ionicons name="chatbubbles" size={size} color={color} /> }} />
-        <Tabs.Screen name="settings" options={{ title: "Settings", tabBarIcon: ({ color, size }) => <Ionicons name="settings" size={size} color={color} /> }} />
+        <Tabs.Screen name="desk" options={{ title: "Front Desk", tabBarIcon: ({ color, size }) => <Ionicons name="notifications" size={size} color={typeof color === "string" ? color : colors.amber} /> }} />
+        <Tabs.Screen name="bookings" options={{ title: "Reservations", tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={typeof color === "string" ? color : colors.amber} /> }} />
+        <Tabs.Screen name="chat" options={{ title: "Chat", tabBarIcon: ({ color, size }) => <Ionicons name="chatbubbles" size={size} color={typeof color === "string" ? color : colors.amber} /> }} />
+        <Tabs.Screen name="settings" options={{ title: "Settings", tabBarIcon: ({ color, size }) => <Ionicons name="settings" size={size} color={typeof color === "string" ? color : colors.amber} /> }} />
       </Tabs>
     </View>
   );
